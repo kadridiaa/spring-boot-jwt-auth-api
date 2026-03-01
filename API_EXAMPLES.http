@@ -1,0 +1,81 @@
+# Exemples de requêtes pour tester l'API
+
+## 1. Vérifier que l'application fonctionne
+
+GET http://localhost:8080/api/public/health
+
+---
+
+## 2. Message de bienvenue (public)
+
+GET http://localhost:8080/api/public/hello
+
+---
+
+## 3. Inscription d'un nouvel utilisateur
+
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "alice",
+  "email": "alice@example.com",
+  "password": "password123"
+}
+
+---
+
+## 4. Connexion avec un utilisateur existant
+
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "user",
+  "password": "password123"
+}
+
+---
+
+## 5. Connexion en tant qu'admin
+
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+---
+
+## 6. Récupérer le profil (nécessite un token)
+
+GET http://localhost:8080/api/auth/profile
+Authorization: Bearer VOTRE_TOKEN_ICI
+
+---
+
+## 7. Test endpoint utilisateur (nécessite un token)
+
+GET http://localhost:8080/api/auth/user/test
+Authorization: Bearer VOTRE_TOKEN_ICI
+
+---
+
+## 8. Test endpoint admin (nécessite un token admin)
+
+GET http://localhost:8080/api/auth/admin/test
+Authorization: Bearer TOKEN_ADMIN_ICI
+
+---
+
+# Instructions pour Postman
+
+1. Créer une nouvelle collection "Spring Auth API"
+2. Ajouter ces requêtes
+3. Pour les endpoints protégés :
+   - Dans l'onglet "Authorization"
+   - Type : "Bearer Token"
+   - Token : collez le token reçu après login
+4. Sauvegarder le token dans une variable d'environnement pour réutilisation
