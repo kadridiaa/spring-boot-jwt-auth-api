@@ -3,111 +3,84 @@
 ### 1. Health Check
 GET http://localhost:8080/api/auth/health
 
-### 2. Get Supported Providers
-GET http://localhost:8080/api/auth/providers
+###
 
-### 3. Register - Local Authentication
+### 2. Register a new user
 POST http://localhost:8080/api/auth/register
 Content-Type: application/json
 
 {
-  "username": "john_doe",
-  "email": "john@example.com",
-  "password": "password123",
-  "provider": "LOCAL"
+  "email": "alice@example.com",
+  "password": "password123"
 }
 
-### 4. Register - Another User
+###
+
+### 3. Register another user
 POST http://localhost:8080/api/auth/register
 Content-Type: application/json
 
 {
-  "username": "jane_smith",
-  "email": "jane@example.com",
-  "password": "securepass456",
-  "provider": "LOCAL"
+  "email": "bob@example.com",
+  "password": "securepass456"
 }
 
-### 5. Login with Username - Local
+###
+
+### 4. Verify email (remplacez tokenId et t avec les vraies valeurs reçues par email/console)
+GET http://localhost:8080/api/auth/verify?tokenId=VOTRE_TOKEN_ID&t=VOTRE_TOKEN_CLEAR
+
+###
+
+### 5. Login - Successful login (après avoir vérifié l'email)
 POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
-  "identifier": "john_doe",
-  "password": "password123",
-  "provider": "LOCAL"
+  "email": "alice@example.com",
+  "password": "password123"
 }
 
-### 6. Login with Email - Local
+###
+
+### 6. Login - Failed (Wrong Password)
 POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
-  "identifier": "jane@example.com",
-  "password": "securepass456",
-  "provider": "LOCAL"
+  "email": "alice@example.com",
+  "password": "wrongpassword"
 }
 
-### 7. Failed Login - Wrong Password
+###
+
+### 7. Login - Failed (Email Not Verified)
 POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
-  "identifier": "john_doe",
-  "password": "wrongpassword",
-  "provider": "LOCAL"
+  "email": "bob@example.com",
+  "password": "securepass456"
 }
 
-### 8. Failed Login - User Not Found
+###
+
+### 8. Login - Failed (User Not Found)
 POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
 {
-  "identifier": "nonexistent_user",
-  "password": "password123",
-  "provider": "LOCAL"
+  "email": "nonexistent@example.com",
+  "password": "password123"
 }
 
-### 9. OAuth Login - Google (Simulation)
-POST http://localhost:8080/api/auth/oauth/login
-Content-Type: application/json
+###
 
-{
-  "accessToken": "google_test_token_12345",
-  "provider": "GOOGLE",
-  "email": "testuser@gmail.com",
-  "username": "testuser",
-  "providerId": "google_123456789"
-}
-
-### 10. OAuth Login - GitHub (Simulation)
-POST http://localhost:8080/api/auth/oauth/login
-Content-Type: application/json
-
-{
-  "accessToken": "github_test_token_67890",
-  "provider": "GITHUB",
-  "username": "githubuser",
-  "providerId": "github_987654321"
-}
-
-### 11. Register - Validation Error (Short Username)
-POST http://localhost:8080/api/auth/register
-Content-Type: application/json
-
-{
-  "username": "ab",
-  "email": "test@example.com",
-  "password": "password123",
-  "provider": "LOCAL"
-}
-
-### 12. Register - Validation Error (Invalid Email)
-POST http://localhost:8080/api/auth/register
-Content-Type: application/json
-
-{
-  "username": "testuser",
+### 9. Check H2 Database Console
+# Ouvrir dans le navigateur: http://localhost:8080/h2-console
+# JDBC URL: jdbc:h2:mem:authdb
+# Username: sa
+# Password: (laisser vide)
   "email": "invalid-email",
   "password": "password123",
   "provider": "LOCAL"

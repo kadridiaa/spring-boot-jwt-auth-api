@@ -1,5 +1,7 @@
 package com.microservices.auth.controller;
 
+import com.microservices.auth.dto.LoginRequest;
+import com.microservices.auth.dto.LoginResponse;
 import com.microservices.auth.dto.RegisterRequest;
 import com.microservices.auth.dto.RegisterResponse;
 import com.microservices.auth.dto.VerifyResponse;
@@ -41,6 +43,23 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
+
+    /**
+     * Login user and get JWT token
+     * POST /api/auth/login
+     */
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        log.info("POST /api/auth/login - email: {}", request.getEmail());
+        
+        LoginResponse response = authService.login(request);
+        
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
 

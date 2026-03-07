@@ -1,5 +1,7 @@
 package com.microservices.auth.service;
 
+import com.microservices.auth.dto.LoginRequest;
+import com.microservices.auth.dto.LoginResponse;
 import com.microservices.auth.dto.RegisterRequest;
 import com.microservices.auth.dto.RegisterResponse;
 import com.microservices.auth.dto.VerifyResponse;
@@ -27,6 +29,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final VerificationTokenRepository tokenRepository;
     private final EventPublisher eventPublisher;
+    private final JwtService jwtService;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Value("${app.verification.token.ttl-minutes}")
@@ -35,10 +38,12 @@ public class AuthService {
     // Constructeur pour injection de dépendances
     public AuthService(UserRepository userRepository, 
                       VerificationTokenRepository tokenRepository,
-                      EventPublisher eventPublisher) {
+                      EventPublisher eventPublisher,
+                      JwtService jwtService) {
         this.userRepository = userRepository;
         this.tokenRepository = tokenRepository;
         this.eventPublisher = eventPublisher;
+        this.jwtService = jwtService;
     }
 
     @Transactional
@@ -77,6 +82,8 @@ public class AuthService {
 
         tokenRepository.save(token);
         log.info("Verification token created: tokenId={}, expiresAt={}", tokenId, token.getExpiresAt());
+        log.info("⚠️ DEV MODE - Token clear for testing: tokenClear={}", tokenClear);
+        log.info("🔗 Verification URL: http://localhost:8080/api/auth/verify?tokenId={}&t={}", tokenId, tokenClear);
 
         // Publish UserRegistered event
         String correlationId = UUID.randomUUID().toString();
@@ -191,6 +198,57 @@ public class AuthService {
         response.setSuccess(true);
         response.setMessage("Email verified successfully!");
         response.setEmail(maskEmail(user.getEmail()));
+        response.setTimestamp(LocalDateTime.now());
+        return response;
+    }
+
+    /**
+     * Authenticate user and generate JWT token
+     */
+    public LoginResponse login(LoginRequest request) {
+        log.info("Login attempt for email: {}", maskEmail(request.getEmail()));
+
+        // Find user by email
+        User user = userRepository.findByEmail(request.getEmail()).orElse(null);
+        if (user == null) {
+            log.warn("Login failed: user not found for email {}", maskEmail(request.getEmail()));
+            LoginResponse response = new LoginResponse();
+            response.setSuccess(false);
+            response.setMessage("Invalid credentials");
+            response.setTimestamp(LocalDateTime.now());
+            return response;
+        }
+
+        // Check if email is verified
+        if (!user.isVerified()) {
+            log.warn("Login failed: email not verified for {}", maskEmail(request.getEmail()));
+            LoginResponse response = new LoginResponse();
+            response.setSuccess(false);
+            response.setMessage("Email not verified. Please verify your email before logging in.");
+            response.setTimestamp(LocalDateTime.now());
+            return response;
+        }
+
+        // Verify password
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            log.warn("Login failed: invalid password for {}", maskEmail(request.getEmail()));
+            LoginResponse response = new LoginResponse();
+            response.setSuccess(false);
+            response.setMessage("Invalid credentials");
+            response.setTimestamp(LocalDateTime.now());
+            return response;
+        }
+
+        // Generate JWT token
+        String token = jwtService.generateToken(user.getEmail(), user.getId());
+        log.info("Login successful for user: {}", maskEmail(user.getEmail()));
+
+        LoginResponse response = new LoginResponse();
+        response.setSuccess(true);
+        response.setMessage("Login successful!");
+        response.setToken(token);
+        response.setEmail(user.getEmail());
+        response.setUserId(user.getId());
         response.setTimestamp(LocalDateTime.now());
         return response;
     }
