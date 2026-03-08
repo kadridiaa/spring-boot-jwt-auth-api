@@ -97,8 +97,8 @@ public class AuthService {
         event.setCorrelationId(correlationId);
         event.setSchemaVersion(1);
 
-        // TODO: Réactiver quand RabbitMQ sera disponible
-        // eventPublisher.publishUserRegistered(event);
+        // Publish event to RabbitMQ
+        eventPublisher.publishUserRegistered(event);
 
         RegisterResponse response = new RegisterResponse();
         response.setSuccess(true);
@@ -191,8 +191,8 @@ public class AuthService {
         event.setCorrelationId(UUID.randomUUID().toString());
         event.setSchemaVersion(1);
 
-        // TODO: Réactiver quand RabbitMQ sera disponible
-        // eventPublisher.publishEmailVerified(event);
+        // Publish event to RabbitMQ (optional analytics)
+        eventPublisher.publishEmailVerified(event);
 
         VerifyResponse response = new VerifyResponse();
         response.setSuccess(true);
