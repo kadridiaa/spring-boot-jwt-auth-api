@@ -5,11 +5,11 @@ FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
 
 # Copy parent pom
-COPY ../pom.xml .
-COPY pom.xml ./notification-service/
+COPY pom.xml .
+COPY notification-service/pom.xml ./notification-service/
 
 # Copy source code
-COPY src ./notification-service/src
+COPY notification-service/src ./notification-service/src
 
 # Build the application
 WORKDIR /app/notification-service

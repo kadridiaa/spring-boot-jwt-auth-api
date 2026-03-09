@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Infrastructure
   rabbitmq:
@@ -33,8 +31,8 @@ services:
   # Microservices
   auth-service:
     build:
-      context: ./auth-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: auth-service/Dockerfile
     container_name: auth-service
     ports:
       - "8080:8080"
@@ -58,8 +56,8 @@ services:
 
   notification-service:
     build:
-      context: ./notification-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: notification-service/Dockerfile
     container_name: notification-service
     ports:
       - "8081:8081"

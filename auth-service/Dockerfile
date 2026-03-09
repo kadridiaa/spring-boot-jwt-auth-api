@@ -5,11 +5,11 @@ FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
 
 # Copy parent pom
-COPY ../pom.xml .
-COPY pom.xml ./auth-service/
+COPY pom.xml .
+COPY auth-service/pom.xml ./auth-service/
 
 # Copy source code
-COPY src ./auth-service/src
+COPY auth-service/src ./auth-service/src
 
 # Build the application
 WORKDIR /app/auth-service
