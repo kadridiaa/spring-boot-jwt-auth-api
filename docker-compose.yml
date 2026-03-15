@@ -41,6 +41,8 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_RABBITMQ_HOST=rabbitmq
       - SPRING_RABBITMQ_PORT=5672
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+      - EUREKA_INSTANCE_PREFERIPADDRESS=true
     networks:
       - microservices-network
     depends_on:
@@ -68,6 +70,8 @@ services:
       - SPRING_RABBITMQ_PORT=5672
       - SPRING_MAIL_HOST=mailhog
       - SPRING_MAIL_PORT=1025
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+      - EUREKA_INSTANCE_PREFERIPADDRESS=true
     networks:
       - microservices-network
     depends_on:
@@ -82,6 +86,86 @@ services:
       retries: 3
       start_period: 40s
     restart: unless-stopped
+
+  discovery-service:
+    build:
+      context: .
+      dockerfile: discovery-service/Dockerfile
+    container_name: discovery-service
+    ports:
+      - "8761:8761"
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8761/eureka/apps"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  gateway-service:
+    build:
+      context: .
+      dockerfile: gateway-service/Dockerfile
+    container_name: gateway-service
+    ports:
+      - "8082:8080" # Gateway exposé sur le port 8082
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+      # Redirection dynamique vers les noms des conteneurs 
+      - AUTH_SERVICE_URI=http://auth-service:8080
+      - NOTIFICATION_SERVICE_URI=http://notification-service:8081
+      - FEED_SERVICE_URI=http://feed-service:8086
+      - SERVICE_A_URI=http://service-a:8083
+      - SERVICE_B_URI=http://service-b:8084
+    networks:
+      - microservices-network
+    depends_on:
+      - discovery-service
+      - auth-service
+      - notification-service
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  service-a:
+    build:
+      context: .
+      dockerfile: service-a/Dockerfile
+    container_name: service-a
+    ports:
+      - "8083:8083"
+    environment:
+      - SERVER_PORT=8083
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+      - EUREKA_INSTANCE_PREFERIPADDRESS=true
+    networks:
+      - microservices-network
+    depends_on:
+      - discovery-service
+
+  service-b:
+    build:
+      context: .
+      dockerfile: service-b/Dockerfile
+    container_name: service-b
+    ports:
+      - "8084:8084"
+    environment:
+      - SERVER_PORT=8084
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+      - EUREKA_INSTANCE_PREFERIPADDRESS=true
+    networks:
+      - microservices-network
+    depends_on:
+      - discovery-service
 
 networks:
   microservices-network:

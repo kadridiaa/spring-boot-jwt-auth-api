@@ -1,0 +1,268 @@
+{
+  "info": {
+    "_postman_id": "a3f1d2e7-bc04-4a89-9c6f-18e52d70b341",
+    "name": "Auth Service API (Current)",
+    "description": "Collection Postman pour le auth-service actuel (register/login/verify/health)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Health endpoint returns 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Health response contains status and service', function () {",
+              "  const responseBodyJson = pm.response.json();",
+              "  pm.expect(responseBodyJson).to.have.property('status', 'UP');",
+              "  pm.expect(responseBodyJson).to.have.property('service', 'auth-service');",
+              "});",
+              "",
+              "pm.test('Health response time is acceptable', function () {",
+              "  pm.expect(pm.response.responseTime).to.be.below(2000);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/health",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "health"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Register New User",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "if (!pm.collectionVariables.get('testEmail')) {",
+              "  const generatedEmail = `postman_${Date.now()}@example.com`;",
+              "  pm.collectionVariables.set('testEmail', generatedEmail);",
+              "}",
+              "",
+              "if (!pm.collectionVariables.get('testPassword')) {",
+              "  pm.collectionVariables.set('testPassword', 'Password123!');",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Register returns 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test('Register response indicates success', function () {",
+              "  const responseBodyJson = pm.response.json();",
+              "  pm.expect(responseBodyJson).to.have.property('success', true);",
+              "  pm.expect(responseBodyJson).to.have.property('message');",
+              "  pm.expect(responseBodyJson).to.have.property('userId');",
+              "  pm.expect(responseBodyJson.userId).to.be.a('number');",
+              "});",
+              "",
+              "pm.test('Register response includes masked email', function () {",
+              "  const responseBodyJson = pm.response.json();",
+              "  pm.expect(responseBodyJson).to.have.property('email');",
+              "  pm.expect(responseBodyJson.email).to.be.a('string');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/register",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "register"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Register Duplicate Email",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Duplicate register returns 400', function () {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test('Duplicate register response indicates failure', function () {",
+              "  const responseBodyJson = pm.response.json();",
+              "  pm.expect(responseBodyJson).to.have.property('success', false);",
+              "  pm.expect(responseBodyJson).to.have.property('message');",
+              "  pm.expect(responseBodyJson.message.toLowerCase()).to.include('already');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/register",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "register"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Login Unverified User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Unverified login returns 401', function () {",
+              "  pm.response.to.have.status(401);",
+              "});",
+              "",
+              "pm.test('Unverified login response indicates not verified', function () {",
+              "  const responseBodyJson = pm.response.json();",
+              "  pm.expect(responseBodyJson).to.have.property('success', false);",
+              "  pm.expect(responseBodyJson).to.have.property('message');",
+              "  pm.expect(responseBodyJson.message.toLowerCase()).to.include('not verified');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\",\n  \"authType\": \"PASSWORD\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Verify Invalid Token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Invalid verify returns 400', function () {",
+              "  pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test('Invalid verify response indicates failure', function () {",
+              "  const responseBodyJson = pm.response.json();",
+              "  pm.expect(responseBodyJson).to.have.property('success', false);",
+              "  pm.expect(responseBodyJson).to.have.property('message');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/verify?tokenId=invalid-token&t=invalid-clear-token",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "verify"
+          ],
+          "query": [
+            {
+              "key": "tokenId",
+              "value": "invalid-token"
+            },
+            {
+              "key": "t",
+              "value": "invalid-clear-token"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: ${AUTH_SERVICE_URI:http://localhost:8080}
+          predicates:
+            - Path=/auth-service/**
+          filters:
+            - StripPrefix=1
+
+        - id: notification-service
+          uri: ${NOTIFICATION_SERVICE_URI:http://localhost:8081}
+          predicates:
+            - Path=/notification-service/**
+          filters:
+            - StripPrefix=1
+            - JwtAuthenticationFilter
+
+        - id: feed-service
+          uri: ${FEED_SERVICE_URI:http://localhost:8086}
+          predicates:
+            - Path=/feed-service/**
+          filters:
+            - StripPrefix=1
+            - JwtAuthenticationFilter
+
+        - id: service-a
+          uri: ${SERVICE_A_URI:http://localhost:8083}
+          predicates:
+            - Path=/service-a/**
+          filters:
+            - StripPrefix=1
+            - JwtAuthenticationFilter
+
+        - id: service-b
+          uri: ${SERVICE_B_URI:http://localhost:8084}
+          predicates:
+            - Path=/service-b/**
+          filters:
+            - StripPrefix=1
+            - JwtAuthenticationFilter
+
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowed-origins: "http://localhost:3000"
+            allowed-methods: "*"
+            allowed-headers: "*"
+            allow-credentials: true
+            max-age: 3600

@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class JwtService {
@@ -22,12 +23,13 @@ public class JwtService {
     private long jwtExpirationMs;
 
     /**
-     * Générer un token JWT pour un utilisateur
+     * Générer un token JWT pour un utilisateur avec ses permissions
      */
-    public String generateToken(String email, Long userId) {
+    public String generateToken(String email, Long userId, Set<String> permissions) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
         claims.put("email", email);
+        claims.put("permissions", permissions);
 
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
@@ -43,25 +45,14 @@ public class JwtService {
                 .compact();
     }
 
-    /**
-     * Extraire l'email du token
-     */
     public String getEmailFromToken(String token) {
-        Claims claims = getClaims(token);
-        return claims.getSubject();
+        return getClaims(token).getSubject();
     }
 
-    /**
-     * Extraire l'userId du token
-     */
     public Long getUserIdFromToken(String token) {
-        Claims claims = getClaims(token);
-        return claims.get("userId", Long.class);
+        return getClaims(token).get("userId", Long.class);
     }
 
-    /**
-     * Valider le token
-     */
     public boolean validateToken(String token) {
         try {
             getClaims(token);
@@ -71,12 +62,8 @@ public class JwtService {
         }
     }
 
-    /**
-     * Extraire les claims du token
-     */
     private Claims getClaims(String token) {
         SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
-        
         return Jwts.parser()
                 .verifyWith(key)
                 .build()

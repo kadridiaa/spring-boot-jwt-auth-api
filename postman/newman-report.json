@@ -1,0 +1,1939 @@
+{
+  "collection": {
+    "_": {
+      "postman_id": "auth-service-current-collection"
+    },
+    "item": [
+      {
+        "id": "04ac0079-3369-4600-ac9a-91d89d7dd889",
+        "name": "Health",
+        "request": {
+          "url": {
+            "path": [
+              "api",
+              "auth",
+              "health"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "method": "GET"
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "b3b4fcbf-9af1-4642-80f9-bdf4f96d011c",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Health endpoint returns 200', function () {",
+                "  pm.response.to.have.status(200);",
+                "});",
+                "",
+                "pm.test('Health response contains status and service', function () {",
+                "  const responseBodyJson = pm.response.json();",
+                "  pm.expect(responseBodyJson).to.have.property('status', 'UP');",
+                "  pm.expect(responseBodyJson).to.have.property('service', 'auth-service');",
+                "});",
+                "",
+                "pm.test('Health response time is acceptable', function () {",
+                "  pm.expect(pm.response.responseTime).to.be.below(2000);",
+                "});"
+              ],
+              "_lastExecutionId": "327be00c-9e1a-4f9e-a356-b4414f0e6572"
+            }
+          }
+        ]
+      },
+      {
+        "id": "84260798-6b37-4462-8585-2656676ce3ef",
+        "name": "Register New User",
+        "request": {
+          "url": {
+            "path": [
+              "api",
+              "auth",
+              "register"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}"
+          }
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "prerequest",
+            "script": {
+              "id": "5911e767-6738-4f05-bf92-6ff858192116",
+              "type": "text/javascript",
+              "exec": [
+                "if (!pm.collectionVariables.get('testEmail')) {",
+                "  const generatedEmail = `postman_${Date.now()}@example.com`;",
+                "  pm.collectionVariables.set('testEmail', generatedEmail);",
+                "}",
+                "",
+                "if (!pm.collectionVariables.get('testPassword')) {",
+                "  pm.collectionVariables.set('testPassword', 'Password123!');",
+                "}"
+              ],
+              "_lastExecutionId": "48bd5e17-2fcf-4306-9918-b0c989e4f102"
+            }
+          },
+          {
+            "listen": "test",
+            "script": {
+              "id": "e86d2312-6292-44aa-ad74-f90670eea8e3",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Register returns 201', function () {",
+                "  pm.response.to.have.status(201);",
+                "});",
+                "",
+                "pm.test('Register response indicates success', function () {",
+                "  const responseBodyJson = pm.response.json();",
+                "  pm.expect(responseBodyJson).to.have.property('success', true);",
+                "  pm.expect(responseBodyJson).to.have.property('message');",
+                "  pm.expect(responseBodyJson).to.have.property('userId');",
+                "  pm.expect(responseBodyJson.userId).to.be.a('number');",
+                "});",
+                "",
+                "pm.test('Register response includes masked email', function () {",
+                "  const responseBodyJson = pm.response.json();",
+                "  pm.expect(responseBodyJson).to.have.property('email');",
+                "  pm.expect(responseBodyJson.email).to.be.a('string');",
+                "});"
+              ],
+              "_lastExecutionId": "0025fcca-6aad-4ad1-9233-e28057390d84"
+            }
+          }
+        ]
+      },
+      {
+        "id": "3249f09c-cb90-476c-9faa-16930d8fad03",
+        "name": "Register Duplicate Email",
+        "request": {
+          "url": {
+            "path": [
+              "api",
+              "auth",
+              "register"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}"
+          }
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "d67a31c1-f68a-4cba-becc-14dcce7af173",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Duplicate register returns 400', function () {",
+                "  pm.response.to.have.status(400);",
+                "});",
+                "",
+                "pm.test('Duplicate register response indicates failure', function () {",
+                "  const responseBodyJson = pm.response.json();",
+                "  pm.expect(responseBodyJson).to.have.property('success', false);",
+                "  pm.expect(responseBodyJson).to.have.property('message');",
+                "  pm.expect(responseBodyJson.message.toLowerCase()).to.include('already');",
+                "});"
+              ],
+              "_lastExecutionId": "51ada76d-7919-469a-81c4-94e244ead246"
+            }
+          }
+        ]
+      },
+      {
+        "id": "42a4135b-fdb6-415b-8bcf-6e86edaed651",
+        "name": "Login Unverified User",
+        "request": {
+          "url": {
+            "path": [
+              "api",
+              "auth",
+              "login"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\",\n  \"authType\": \"PASSWORD\"\n}"
+          }
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "ea35670a-0f73-4bc8-928d-b7349ebe4f86",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Unverified login returns 401', function () {",
+                "  pm.response.to.have.status(401);",
+                "});",
+                "",
+                "pm.test('Unverified login response indicates not verified', function () {",
+                "  const responseBodyJson = pm.response.json();",
+                "  pm.expect(responseBodyJson).to.have.property('success', false);",
+                "  pm.expect(responseBodyJson).to.have.property('message');",
+                "  pm.expect(responseBodyJson.message.toLowerCase()).to.include('not verified');",
+                "});"
+              ],
+              "_lastExecutionId": "3ca103bb-4906-44b2-ace9-5fe7441c192c"
+            }
+          }
+        ]
+      },
+      {
+        "id": "28b8232a-66c7-46d5-b9c9-2bbae7aeb699",
+        "name": "Verify Invalid Token",
+        "request": {
+          "url": {
+            "path": [
+              "api",
+              "auth",
+              "verify"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [
+              {
+                "key": "tokenId",
+                "value": "invalid-token"
+              },
+              {
+                "key": "t",
+                "value": "invalid-clear-token"
+              }
+            ],
+            "variable": []
+          },
+          "method": "GET"
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "dffef2c5-1198-482d-ac76-565519971c29",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Invalid verify returns 400', function () {",
+                "  pm.response.to.have.status(400);",
+                "});",
+                "",
+                "pm.test('Invalid verify response indicates failure', function () {",
+                "  const responseBodyJson = pm.response.json();",
+                "  pm.expect(responseBodyJson).to.have.property('success', false);",
+                "  pm.expect(responseBodyJson).to.have.property('message');",
+                "});"
+              ],
+              "_lastExecutionId": "f7a0c972-c54e-419d-886a-093c76e7f2e4"
+            }
+          }
+        ]
+      }
+    ],
+    "event": [],
+    "variable": [
+      {
+        "type": "any",
+        "value": "http://localhost:8080",
+        "key": "baseUrl"
+      }
+    ],
+    "info": {
+      "_postman_id": "auth-service-current-collection",
+      "name": "Auth Service API (Current)",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+      "description": {
+        "content": "Collection Postman pour le auth-service actuel (register/login/verify/health)",
+        "type": "text/plain"
+      }
+    }
+  },
+  "environment": {
+    "_": {
+      "postman_variable_scope": "environment",
+      "postman_exported_at": "2026-03-12T00:00:00.000Z",
+      "postman_exported_using": "GPT-5.3-Codex"
+    },
+    "id": "auth-service-local-env",
+    "name": "Auth Service - Local",
+    "values": [
+      {
+        "type": "any",
+        "value": "http://localhost:8080",
+        "key": "baseUrl"
+      }
+    ]
+  },
+  "globals": {
+    "id": "bb0dc743-dcbe-46cd-8159-11fa46da15f8",
+    "values": []
+  },
+  "run": {
+    "stats": {
+      "iterations": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "items": {
+        "total": 5,
+        "pending": 0,
+        "failed": 0
+      },
+      "scripts": {
+        "total": 6,
+        "pending": 0,
+        "failed": 0
+      },
+      "prerequests": {
+        "total": 5,
+        "pending": 0,
+        "failed": 0
+      },
+      "requests": {
+        "total": 5,
+        "pending": 0,
+        "failed": 0
+      },
+      "tests": {
+        "total": 5,
+        "pending": 0,
+        "failed": 0
+      },
+      "assertions": {
+        "total": 12,
+        "pending": 0,
+        "failed": 0
+      },
+      "testScripts": {
+        "total": 5,
+        "pending": 0,
+        "failed": 0
+      },
+      "prerequestScripts": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      }
+    },
+    "timings": {
+      "responseAverage": 204.6,
+      "responseMin": 15,
+      "responseMax": 805,
+      "responseSd": 304.78490776283525,
+      "dnsAverage": 0,
+      "dnsMin": 0,
+      "dnsMax": 0,
+      "dnsSd": 0,
+      "firstByteAverage": 0,
+      "firstByteMin": 0,
+      "firstByteMax": 0,
+      "firstByteSd": 0,
+      "started": 1773322296747,
+      "completed": 1773322297936
+    },
+    "executions": [
+      {
+        "cursor": {
+          "position": 0,
+          "iteration": 0,
+          "length": 5,
+          "cycles": 1,
+          "empty": false,
+          "eof": false,
+          "bof": true,
+          "cr": false,
+          "ref": "3e175b12-d22d-4f97-b7eb-d5de6991e24f",
+          "httpRequestId": "b15adac6-7155-4d77-a50c-b2adf9d6a4eb"
+        },
+        "item": {
+          "id": "04ac0079-3369-4600-ac9a-91d89d7dd889",
+          "name": "Health",
+          "request": {
+            "url": {
+              "path": [
+                "api",
+                "auth",
+                "health"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "GET"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "b3b4fcbf-9af1-4642-80f9-bdf4f96d011c",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Health endpoint returns 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Health response contains status and service', function () {",
+                  "  const responseBodyJson = pm.response.json();",
+                  "  pm.expect(responseBodyJson).to.have.property('status', 'UP');",
+                  "  pm.expect(responseBodyJson).to.have.property('service', 'auth-service');",
+                  "});",
+                  "",
+                  "pm.test('Health response time is acceptable', function () {",
+                  "  pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ],
+                "_lastExecutionId": "327be00c-9e1a-4f9e-a356-b4414f0e6572"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "8080",
+            "path": [
+              "api",
+              "auth",
+              "health"
+            ],
+            "host": [
+              "localhost"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.0",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "c0ee6bcd-9e27-4fba-b2e2-919466e9fe1e",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "localhost:8080",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            }
+          ],
+          "method": "GET"
+        },
+        "response": {
+          "id": "19cd2d24-3617-4371-8b3b-2bd47e0d02e1",
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Vary",
+              "value": "Access-Control-Request-Method"
+            },
+            {
+              "key": "Vary",
+              "value": "Access-Control-Request-Headers"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 12 Mar 2026 13:31:36 GMT"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=60"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              115,
+              116,
+              97,
+              116,
+              117,
+              115,
+              34,
+              58,
+              34,
+              85,
+              80,
+              34,
+              44,
+              34,
+              115,
+              101,
+              114,
+              118,
+              105,
+              99,
+              101,
+              34,
+              58,
+              34,
+              97,
+              117,
+              116,
+              104,
+              45,
+              115,
+              101,
+              114,
+              118,
+              105,
+              99,
+              101,
+              34,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 30,
+          "responseSize": 40
+        },
+        "id": "04ac0079-3369-4600-ac9a-91d89d7dd889",
+        "assertions": [
+          {
+            "assertion": "Health endpoint returns 200",
+            "skipped": false
+          },
+          {
+            "assertion": "Health response contains status and service",
+            "skipped": false
+          },
+          {
+            "assertion": "Health response time is acceptable",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "a4f5f9b1-2107-4486-b22d-e47db951c426",
+          "length": 5,
+          "cycles": 1,
+          "position": 1,
+          "iteration": 0,
+          "httpRequestId": "118bc821-99be-4282-bf09-ac50d082cc8e"
+        },
+        "item": {
+          "id": "84260798-6b37-4462-8585-2656676ce3ef",
+          "name": "Register New User",
+          "request": {
+            "url": {
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "5911e767-6738-4f05-bf92-6ff858192116",
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get('testEmail')) {",
+                  "  const generatedEmail = `postman_${Date.now()}@example.com`;",
+                  "  pm.collectionVariables.set('testEmail', generatedEmail);",
+                  "}",
+                  "",
+                  "if (!pm.collectionVariables.get('testPassword')) {",
+                  "  pm.collectionVariables.set('testPassword', 'Password123!');",
+                  "}"
+                ],
+                "_lastExecutionId": "48bd5e17-2fcf-4306-9918-b0c989e4f102"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "id": "e86d2312-6292-44aa-ad74-f90670eea8e3",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Register returns 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Register response indicates success', function () {",
+                  "  const responseBodyJson = pm.response.json();",
+                  "  pm.expect(responseBodyJson).to.have.property('success', true);",
+                  "  pm.expect(responseBodyJson).to.have.property('message');",
+                  "  pm.expect(responseBodyJson).to.have.property('userId');",
+                  "  pm.expect(responseBodyJson.userId).to.be.a('number');",
+                  "});",
+                  "",
+                  "pm.test('Register response includes masked email', function () {",
+                  "  const responseBodyJson = pm.response.json();",
+                  "  pm.expect(responseBodyJson).to.have.property('email');",
+                  "  pm.expect(responseBodyJson.email).to.be.a('string');",
+                  "});"
+                ],
+                "_lastExecutionId": "0025fcca-6aad-4ad1-9233-e28057390d84"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "8080",
+            "path": [
+              "api",
+              "auth",
+              "register"
+            ],
+            "host": [
+              "localhost"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.0",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "631c6335-2dde-4b1b-96b2-42f12bbf46f1",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "localhost:8080",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            },
+            {
+              "key": "Content-Length",
+              "value": "80",
+              "system": true
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"email\": \"postman_1773322296838@example.com\",\n  \"password\": \"Password123!\"\n}"
+          }
+        },
+        "response": {
+          "id": "1b7a7a99-30de-435e-a98f-aaf80311e608",
+          "status": "Created",
+          "code": 201,
+          "header": [
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Vary",
+              "value": "Access-Control-Request-Method"
+            },
+            {
+              "key": "Vary",
+              "value": "Access-Control-Request-Headers"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 12 Mar 2026 13:31:36 GMT"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=60"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              115,
+              117,
+              99,
+              99,
+              101,
+              115,
+              115,
+              34,
+              58,
+              116,
+              114,
+              117,
+              101,
+              44,
+              34,
+              109,
+              101,
+              115,
+              115,
+              97,
+              103,
+              101,
+              34,
+              58,
+              34,
+              82,
+              101,
+              103,
+              105,
+              115,
+              116,
+              114,
+              97,
+              116,
+              105,
+              111,
+              110,
+              32,
+              115,
+              117,
+              99,
+              99,
+              101,
+              115,
+              115,
+              102,
+              117,
+              108,
+              46,
+              32,
+              80,
+              108,
+              101,
+              97,
+              115,
+              101,
+              32,
+              99,
+              104,
+              101,
+              99,
+              107,
+              32,
+              121,
+              111,
+              117,
+              114,
+              32,
+              101,
+              109,
+              97,
+              105,
+              108,
+              46,
+              34,
+              44,
+              34,
+              117,
+              115,
+              101,
+              114,
+              73,
+              100,
+              34,
+              58,
+              49,
+              44,
+              34,
+              101,
+              109,
+              97,
+              105,
+              108,
+              34,
+              58,
+              34,
+              112,
+              111,
+              42,
+              42,
+              42,
+              64,
+              101,
+              120,
+              97,
+              109,
+              112,
+              108,
+              101,
+              46,
+              99,
+              111,
+              109,
+              34,
+              44,
+              34,
+              116,
+              105,
+              109,
+              101,
+              115,
+              116,
+              97,
+              109,
+              112,
+              34,
+              58,
+              34,
+              50,
+              48,
+              50,
+              54,
+              45,
+              48,
+              51,
+              45,
+              49,
+              50,
+              84,
+              49,
+              51,
+              58,
+              51,
+              49,
+              58,
+              51,
+              55,
+              46,
+              54,
+              49,
+              55,
+              55,
+              54,
+              54,
+              57,
+              57,
+              52,
+              34,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 805,
+          "responseSize": 161
+        },
+        "id": "84260798-6b37-4462-8585-2656676ce3ef",
+        "assertions": [
+          {
+            "assertion": "Register returns 201",
+            "skipped": false
+          },
+          {
+            "assertion": "Register response indicates success",
+            "skipped": false
+          },
+          {
+            "assertion": "Register response includes masked email",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "33a7d860-74d1-4f6d-aaf7-0252e442a472",
+          "length": 5,
+          "cycles": 1,
+          "position": 2,
+          "iteration": 0,
+          "httpRequestId": "cfa477a2-0278-4dfe-a0b3-2a942c5fdc6d"
+        },
+        "item": {
+          "id": "3249f09c-cb90-476c-9faa-16930d8fad03",
+          "name": "Register Duplicate Email",
+          "request": {
+            "url": {
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "d67a31c1-f68a-4cba-becc-14dcce7af173",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Duplicate register returns 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Duplicate register response indicates failure', function () {",
+                  "  const responseBodyJson = pm.response.json();",
+                  "  pm.expect(responseBodyJson).to.have.property('success', false);",
+                  "  pm.expect(responseBodyJson).to.have.property('message');",
+                  "  pm.expect(responseBodyJson.message.toLowerCase()).to.include('already');",
+                  "});"
+                ],
+                "_lastExecutionId": "51ada76d-7919-469a-81c4-94e244ead246"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "8080",
+            "path": [
+              "api",
+              "auth",
+              "register"
+            ],
+            "host": [
+              "localhost"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.0",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "dba26d8a-0042-47d2-8bf6-cf3c2d73eb67",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "localhost:8080",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            },
+            {
+              "key": "Content-Length",
+              "value": "80",
+              "system": true
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"email\": \"postman_1773322296838@example.com\",\n  \"password\": \"Password123!\"\n}"
+          }
+        },
+        "response": {
+          "id": "486d7633-96a7-4954-86b6-287a3c3d687d",
+          "status": "Bad Request",
+          "code": 400,
+          "header": [
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Vary",
+              "value": "Access-Control-Request-Method"
+            },
+            {
+              "key": "Vary",
+              "value": "Access-Control-Request-Headers"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 12 Mar 2026 13:31:36 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "close"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              115,
+              117,
+              99,
+              99,
+              101,
+              115,
+              115,
+              34,
+              58,
+              102,
+              97,
+              108,
+              115,
+              101,
+              44,
+              34,
+              109,
+              101,
+              115,
+              115,
+              97,
+              103,
+              101,
+              34,
+              58,
+              34,
+              69,
+              109,
+              97,
+              105,
+              108,
+              32,
+              97,
+              108,
+              114,
+              101,
+              97,
+              100,
+              121,
+              32,
+              114,
+              101,
+              103,
+              105,
+              115,
+              116,
+              101,
+              114,
+              101,
+              100,
+              34,
+              44,
+              34,
+              117,
+              115,
+              101,
+              114,
+              73,
+              100,
+              34,
+              58,
+              110,
+              117,
+              108,
+              108,
+              44,
+              34,
+              101,
+              109,
+              97,
+              105,
+              108,
+              34,
+              58,
+              110,
+              117,
+              108,
+              108,
+              44,
+              34,
+              116,
+              105,
+              109,
+              101,
+              115,
+              116,
+              97,
+              109,
+              112,
+              34,
+              58,
+              34,
+              50,
+              48,
+              50,
+              54,
+              45,
+              48,
+              51,
+              45,
+              49,
+              50,
+              84,
+              49,
+              51,
+              58,
+              51,
+              49,
+              58,
+              51,
+              55,
+              46,
+              54,
+              57,
+              55,
+              52,
+              55,
+              51,
+              51,
+              49,
+              34,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 15,
+          "responseSize": 124
+        },
+        "id": "3249f09c-cb90-476c-9faa-16930d8fad03",
+        "assertions": [
+          {
+            "assertion": "Duplicate register returns 400",
+            "skipped": false
+          },
+          {
+            "assertion": "Duplicate register response indicates failure",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "3be0aa3a-89ea-46eb-8b03-4a3700373e45",
+          "length": 5,
+          "cycles": 1,
+          "position": 3,
+          "iteration": 0,
+          "httpRequestId": "76355322-f01e-45da-a529-c168565d8f52"
+        },
+        "item": {
+          "id": "42a4135b-fdb6-415b-8bcf-6e86edaed651",
+          "name": "Login Unverified User",
+          "request": {
+            "url": {
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\",\n  \"authType\": \"PASSWORD\"\n}"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "ea35670a-0f73-4bc8-928d-b7349ebe4f86",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Unverified login returns 401', function () {",
+                  "  pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test('Unverified login response indicates not verified', function () {",
+                  "  const responseBodyJson = pm.response.json();",
+                  "  pm.expect(responseBodyJson).to.have.property('success', false);",
+                  "  pm.expect(responseBodyJson).to.have.property('message');",
+                  "  pm.expect(responseBodyJson.message.toLowerCase()).to.include('not verified');",
+                  "});"
+                ],
+                "_lastExecutionId": "3ca103bb-4906-44b2-ace9-5fe7441c192c"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "8080",
+            "path": [
+              "api",
+              "auth",
+              "login"
+            ],
+            "host": [
+              "localhost"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.0",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "e0831fd5-ea13-4302-b1ca-6a3f55d33c89",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "localhost:8080",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            },
+            {
+              "key": "Content-Length",
+              "value": "106",
+              "system": true
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"email\": \"postman_1773322296838@example.com\",\n  \"password\": \"Password123!\",\n  \"authType\": \"PASSWORD\"\n}"
+          }
+        },
+        "response": {
+          "id": "1dc48351-8850-424c-be89-f954d0f67146",
+          "status": "Unauthorized",
+          "code": 401,
+          "header": [
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Vary",
+              "value": "Access-Control-Request-Method"
+            },
+            {
+              "key": "Vary",
+              "value": "Access-Control-Request-Headers"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 12 Mar 2026 13:31:37 GMT"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=60"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              115,
+              117,
+              99,
+              99,
+              101,
+              115,
+              115,
+              34,
+              58,
+              102,
+              97,
+              108,
+              115,
+              101,
+              44,
+              34,
+              109,
+              101,
+              115,
+              115,
+              97,
+              103,
+              101,
+              34,
+              58,
+              34,
+              69,
+              109,
+              97,
+              105,
+              108,
+              32,
+              110,
+              111,
+              116,
+              32,
+              118,
+              101,
+              114,
+              105,
+              102,
+              105,
+              101,
+              100,
+              46,
+              32,
+              80,
+              108,
+              101,
+              97,
+              115,
+              101,
+              32,
+              118,
+              101,
+              114,
+              105,
+              102,
+              121,
+              32,
+              121,
+              111,
+              117,
+              114,
+              32,
+              101,
+              109,
+              97,
+              105,
+              108,
+              46,
+              34,
+              44,
+              34,
+              116,
+              111,
+              107,
+              101,
+              110,
+              34,
+              58,
+              110,
+              117,
+              108,
+              108,
+              44,
+              34,
+              101,
+              109,
+              97,
+              105,
+              108,
+              34,
+              58,
+              110,
+              117,
+              108,
+              108,
+              44,
+              34,
+              117,
+              115,
+              101,
+              114,
+              73,
+              100,
+              34,
+              58,
+              110,
+              117,
+              108,
+              108,
+              44,
+              34,
+              116,
+              105,
+              109,
+              101,
+              115,
+              116,
+              97,
+              109,
+              112,
+              34,
+              58,
+              34,
+              50,
+              48,
+              50,
+              54,
+              45,
+              48,
+              51,
+              45,
+              49,
+              50,
+              84,
+              49,
+              51,
+              58,
+              51,
+              49,
+              58,
+              51,
+              55,
+              46,
+              56,
+              56,
+              50,
+              51,
+              55,
+              54,
+              56,
+              48,
+              57,
+              34,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 156,
+          "responseSize": 159
+        },
+        "id": "42a4135b-fdb6-415b-8bcf-6e86edaed651",
+        "assertions": [
+          {
+            "assertion": "Unverified login returns 401",
+            "skipped": false
+          },
+          {
+            "assertion": "Unverified login response indicates not verified",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "8b6e916d-1d4e-4e04-8046-c74a94acfbb9",
+          "length": 5,
+          "cycles": 1,
+          "position": 4,
+          "iteration": 0,
+          "httpRequestId": "5f02bfbf-c878-4364-856d-1ce593261442"
+        },
+        "item": {
+          "id": "28b8232a-66c7-46d5-b9c9-2bbae7aeb699",
+          "name": "Verify Invalid Token",
+          "request": {
+            "url": {
+              "path": [
+                "api",
+                "auth",
+                "verify"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "key": "tokenId",
+                  "value": "invalid-token"
+                },
+                {
+                  "key": "t",
+                  "value": "invalid-clear-token"
+                }
+              ],
+              "variable": []
+            },
+            "method": "GET"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "dffef2c5-1198-482d-ac76-565519971c29",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Invalid verify returns 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('Invalid verify response indicates failure', function () {",
+                  "  const responseBodyJson = pm.response.json();",
+                  "  pm.expect(responseBodyJson).to.have.property('success', false);",
+                  "  pm.expect(responseBodyJson).to.have.property('message');",
+                  "});"
+                ],
+                "_lastExecutionId": "f7a0c972-c54e-419d-886a-093c76e7f2e4"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "8080",
+            "path": [
+              "api",
+              "auth",
+              "verify"
+            ],
+            "host": [
+              "localhost"
+            ],
+            "query": [
+              {
+                "key": "tokenId",
+                "value": "invalid-token"
+              },
+              {
+                "key": "t",
+                "value": "invalid-clear-token"
+              }
+            ],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.0",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "c1b8f885-1bc6-42d3-a8ce-c76d8a2877e5",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "localhost:8080",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            }
+          ],
+          "method": "GET"
+        },
+        "response": {
+          "id": "ab8c1532-b5a6-4382-85a7-84e1a4359a00",
+          "status": "Bad Request",
+          "code": 400,
+          "header": [
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Vary",
+              "value": "Access-Control-Request-Method"
+            },
+            {
+              "key": "Vary",
+              "value": "Access-Control-Request-Headers"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 12 Mar 2026 13:31:37 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "close"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              115,
+              117,
+              99,
+              99,
+              101,
+              115,
+              115,
+              34,
+              58,
+              102,
+              97,
+              108,
+              115,
+              101,
+              44,
+              34,
+              109,
+              101,
+              115,
+              115,
+              97,
+              103,
+              101,
+              34,
+              58,
+              34,
+              73,
+              110,
+              118,
+              97,
+              108,
+              105,
+              100,
+              32,
+              111,
+              114,
+              32,
+              101,
+              120,
+              112,
+              105,
+              114,
+              101,
+              100,
+              32,
+              118,
+              101,
+              114,
+              105,
+              102,
+              105,
+              99,
+              97,
+              116,
+              105,
+              111,
+              110,
+              32,
+              108,
+              105,
+              110,
+              107,
+              34,
+              44,
+              34,
+              101,
+              109,
+              97,
+              105,
+              108,
+              34,
+              58,
+              110,
+              117,
+              108,
+              108,
+              44,
+              34,
+              116,
+              105,
+              109,
+              101,
+              115,
+              116,
+              97,
+              109,
+              112,
+              34,
+              58,
+              34,
+              50,
+              48,
+              50,
+              54,
+              45,
+              48,
+              51,
+              45,
+              49,
+              50,
+              84,
+              49,
+              51,
+              58,
+              51,
+              49,
+              58,
+              51,
+              55,
+              46,
+              57,
+              49,
+              52,
+              55,
+              48,
+              49,
+              48,
+              50,
+              56,
+              34,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 17,
+          "responseSize": 123
+        },
+        "id": "28b8232a-66c7-46d5-b9c9-2bbae7aeb699",
+        "assertions": [
+          {
+            "assertion": "Invalid verify returns 400",
+            "skipped": false
+          },
+          {
+            "assertion": "Invalid verify response indicates failure",
+            "skipped": false
+          }
+        ]
+      }
+    ],
+    "transfers": {
+      "responseTotal": 607
+    },
+    "failures": [],
+    "error": null
+  }
+}

@@ -1,0 +1,392 @@
+{
+"info": {
+"name": "PBAC Complete Flow (Admin & Users)",
+"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+},
+"item": [
+{
+"name": "1. Admin Setup (Creates first Admin)",
+"event": [
+{
+"listen": "test",
+"script": {
+"exec": [
+"pm.test(\"Status code is 200/201\", function () {",
+"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+"});"
+],
+"type": "text/javascript"
+}
+}
+],
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "{\n  \"firstName\": \"Super\",\n  \"lastName\": \"Admin\",\n  \"email\": \"admin@test.com\",\n  \"password\": \"admin123\"\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/auth-service/api/auth/setup",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"auth-service",
+"api",
+"auth",
+"setup"
+]
+}
+}
+},
+{
+"name": "2. Verify Admin Email (Skip if Auto)",
+"request": {
+"method": "GET",
+"header": [],
+"url": {
+"raw": "{{baseUrl}}/auth-service/api/auth/verify?tokenId=YOUR_TOKEN_HERE_FROM_MAILHOG&t=YOUR_T_HERE",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"auth-service",
+"api",
+"auth",
+"verify"
+],
+"query": [
+{
+"key": "tokenId",
+"value": "YOUR_TOKEN_HERE_FROM_MAILHOG"
+},
+{
+"key": "t",
+"value": "YOUR_T_HERE"
+}
+]
+}
+}
+},
+{
+"name": "3. Admin Login",
+"event": [
+{
+"listen": "test",
+"script": {
+"exec": [
+"var jsonData = pm.response.json();",
+"if (jsonData.token) {",
+"    pm.environment.set(\"admin_token\", jsonData.token);",
+"}"
+],
+"type": "text/javascript"
+}
+}
+],
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "{\n  \"email\": \"admin@test.com\",\n  \"password\": \"admin123\"\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/auth-service/api/auth/login",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"auth-service",
+"api",
+"auth",
+"login"
+]
+}
+}
+},
+{
+"name": "4. Register Standard User",
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "{\n  \"firstName\": \"Bob\",\n  \"lastName\": \"User\",\n  \"email\": \"bob@test.com\",\n  \"password\": \"password123\"\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/auth-service/api/auth/register",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"auth-service",
+"api",
+"auth",
+"register"
+]
+}
+}
+},
+{
+"name": "5. Verify User Email (Skip if Auto)",
+"request": {
+"method": "GET",
+"header": [],
+"url": {
+"raw": "{{baseUrl}}/auth-service/api/auth/verify?tokenId=YOUR_TOKEN_HERE_FROM_MAILHOG&t=YOUR_T_HERE",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"auth-service",
+"api",
+"auth",
+"verify"
+],
+"query": [
+{
+"key": "tokenId",
+"value": "YOUR_TOKEN_HERE_FROM_MAILHOG"
+},
+{
+"key": "t",
+"value": "YOUR_T_HERE"
+}
+]
+}
+}
+},
+{
+"name": "6. User Login (Gets user_token)",
+"event": [
+{
+"listen": "test",
+"script": {
+"exec": [
+"var jsonData = pm.response.json();",
+"if (jsonData.token) {",
+"    pm.environment.set(\"user_token\", jsonData.token);",
+"}"
+],
+"type": "text/javascript"
+}
+}
+],
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "{\n  \"email\": \"bob@test.com\",\n  \"password\": \"password123\"\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/auth-service/api/auth/login",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"auth-service",
+"api",
+"auth",
+"login"
+]
+}
+}
+},
+{
+"name": "7. User tries Service A (Should Fail 403)",
+"request": {
+"auth": {
+"type": "bearer",
+"bearer": [
+{
+"key": "token",
+"value": "{{user_token}}",
+"type": "string"
+}
+]
+},
+"method": "GET",
+"header": [],
+"url": {
+"raw": "{{baseUrl}}/service-a/hello",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"service-a",
+"hello"
+]
+}
+}
+},
+{
+"name": "8. Admin updates User Permissions",
+"request": {
+"auth": {
+"type": "bearer",
+"bearer": [
+{
+"key": "token",
+"value": "{{admin_token}}",
+"type": "string"
+}
+]
+},
+"method": "PUT",
+"header": [
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "[\n    \"ROLE_A\",\n    \"ROLE_B\"\n]"
+},
+"url": {
+"raw": "{{baseUrl}}/auth-service/api/auth/permissions?email=bob@test.com",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"auth-service",
+"api",
+"auth",
+"permissions"
+],
+"query": [
+{
+"key": "email",
+"value": "bob@test.com"
+}
+]
+}
+}
+},
+{
+"name": "9. User Login AGAIN (To refresh token)",
+"event": [
+{
+"listen": "test",
+"script": {
+"exec": [
+"var jsonData = pm.response.json();",
+"if (jsonData.token) {",
+"    pm.environment.set(\"user_token\", jsonData.token);",
+"}"
+],
+"type": "text/javascript"
+}
+}
+],
+"request": {
+"method": "POST",
+"header": [
+{
+"key": "Content-Type",
+"value": "application/json"
+}
+],
+"body": {
+"mode": "raw",
+"raw": "{\n  \"email\": \"bob@test.com\",\n  \"password\": \"password123\"\n}"
+},
+"url": {
+"raw": "{{baseUrl}}/auth-service/api/auth/login",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"auth-service",
+"api",
+"auth",
+"login"
+]
+}
+}
+},
+{
+"name": "10. User tries Service A (Should Succeed 200)",
+"request": {
+"auth": {
+"type": "bearer",
+"bearer": [
+{
+"key": "token",
+"value": "{{user_token}}",
+"type": "string"
+}
+]
+},
+"method": "GET",
+"header": [],
+"url": {
+"raw": "{{baseUrl}}/service-a/hello",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"service-a",
+"hello"
+]
+}
+}
+},
+{
+"name": "11. User tries Service B (Should Succeed 200)",
+"request": {
+"auth": {
+"type": "bearer",
+"bearer": [
+{
+"key": "token",
+"value": "{{user_token}}",
+"type": "string"
+}
+]
+},
+"method": "GET",
+"header": [],
+"url": {
+"raw": "{{baseUrl}}/service-b/hello",
+"host": [
+"{{baseUrl}}"
+],
+"path": [
+"service-b",
+"hello"
+]
+}
+}
+}
+],
+"variable": [
+{
+"key": "baseUrl",
+"value": "http://localhost:8080"
+}
+]
+}
