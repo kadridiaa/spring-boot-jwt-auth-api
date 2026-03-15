@@ -3,417 +3,637 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test API Auth - Interface</title>
+    <title>PBAC Test Console</title>
     <style>
+        :root {
+            --bg-1: #081626;
+            --bg-2: #0f2d2f;
+            --card: rgba(255, 255, 255, 0.92);
+            --text: #102124;
+            --muted: #4f6364;
+            --line: #d7e2e2;
+            --primary: #0f766e;
+            --primary-2: #155e75;
+            --danger: #be123c;
+            --warning: #b45309;
+            --ok: #0f766e;
+        }
+
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: "Manrope", "Segoe UI", sans-serif;
+            color: var(--text);
             min-height: 100vh;
+            background:
+                radial-gradient(1200px 400px at 10% -10%, rgba(34, 211, 238, 0.25), transparent 55%),
+                radial-gradient(900px 350px at 90% 10%, rgba(45, 212, 191, 0.22), transparent 60%),
+                linear-gradient(155deg, var(--bg-1), var(--bg-2));
             padding: 20px;
         }
-        
+
         .container {
-            max-width: 1200px;
+            max-width: 1280px;
             margin: 0 auto;
-        }
-        
-        h1 {
-            color: white;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
+            gap: 16px;
         }
-        
+
+        .hero {
+            background: rgba(0, 0, 0, 0.22);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 18px;
+            padding: 20px;
+            color: #eefefe;
+            backdrop-filter: blur(6px);
+            animation: rise .38s ease-out;
+        }
+
+        .hero h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .hero p {
+            color: #bde8e8;
+            line-height: 1.45;
+            font-size: 0.95rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 16px;
+        }
+
         .card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            background: var(--card);
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+            animation: rise .42s ease-out;
         }
-        
+
         .card h2 {
-            color: #667eea;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
+            font-size: 1rem;
+            letter-spacing: 0.02em;
+            border-bottom: 1px solid var(--line);
+            padding-bottom: 8px;
+            margin-bottom: 12px;
         }
-        
-        .form-group {
-            margin-bottom: 15px;
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
         }
-        
+
+        .field {
+            display: grid;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
         label {
-            display: block;
-            margin-bottom: 5px;
-            color: #333;
-            font-weight: 600;
+            font-size: 0.83rem;
+            font-weight: 700;
+            color: var(--muted);
         }
-        
-        input {
+
+        input, textarea, select {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s;
+            border: 1px solid #bfd0d0;
+            border-radius: 9px;
+            padding: 9px 10px;
+            font-size: 0.92rem;
+            font-family: inherit;
+            background: #fbfefe;
         }
-        
-        input:focus {
-            outline: none;
-            border-color: #667eea;
+
+        textarea {
+            min-height: 66px;
+            resize: vertical;
         }
-        
+
         button {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
+            border-radius: 10px;
+            padding: 10px 12px;
+            color: #f4ffff;
+            background: linear-gradient(145deg, var(--primary), var(--primary-2));
+            font-weight: 700;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform .15s ease, box-shadow .15s ease;
+            width: 100%;
         }
-        
+
         button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            transform: translateY(-1px);
+            box-shadow: 0 7px 16px rgba(21, 94, 117, 0.30);
         }
-        
-        button:active {
-            transform: translateY(0);
+
+        .btn-line {
+            background: linear-gradient(145deg, #065f46, #166534);
         }
-        
-        .btn-secondary {
-            background: linear-gradient(135deg, #48c6ef 0%, #6f86d6 100%);
-            margin-top: 10px;
+
+        .btn-warn {
+            background: linear-gradient(145deg, #b45309, #92400e);
         }
-        
-        .btn-admin {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+
+        .btn-danger {
+            background: linear-gradient(145deg, #be123c, #9f1239);
         }
-        
-        .btn-public {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+
+        .stack {
+            display: grid;
+            gap: 8px;
         }
-        
-        #response {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+
+        .token-block {
+            font-size: 0.79rem;
+            line-height: 1.35;
+            border: 1px solid #cde0e0;
+            border-radius: 10px;
+            background: #f5fbfb;
+            padding: 9px;
+            word-break: break-all;
+            max-height: 95px;
+            overflow: auto;
         }
-        
-        #response h2 {
-            color: #667eea;
-            margin-bottom: 15px;
-        }
-        
-        #output {
-            background: #f5f5f5;
-            padding: 15px;
-            border-radius: 8px;
-            max-height: 400px;
-            overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            line-height: 1.6;
+
+        .console {
+            background: #071a1e;
+            border: 1px solid #19454d;
+            border-radius: 14px;
+            padding: 14px;
+            color: #d8f9f5;
+            font-family: Consolas, "Courier New", monospace;
+            min-height: 260px;
+            max-height: 430px;
+            overflow: auto;
             white-space: pre-wrap;
-            word-wrap: break-word;
         }
-        
-        .token-display {
-            background: #fffbea;
-            border: 2px solid #ffd700;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 15px;
-            word-wrap: break-word;
+
+        .hint {
+            border-left: 4px solid #1d4ed8;
+            background: #eff6ff;
+            border-radius: 10px;
+            padding: 10px;
+            color: #1e3a8a;
+            font-size: 0.86rem;
+            line-height: 1.4;
         }
-        
-        .token-display strong {
-            color: #d97706;
+
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        
-        .success {
-            color: #10b981;
-            font-weight: bold;
-        }
-        
-        .error {
-            color: #ef4444;
-            font-weight: bold;
-        }
-        
-        .info {
-            background: #e0f2fe;
-            border-left: 4px solid #0284c7;
-            padding: 12px;
-            margin-bottom: 15px;
-            border-radius: 5px;
+
+        @media (max-width: 680px) {
+            .row {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔐 Test API Authentication</h1>
-        
-        <div class="info">
-            <strong>URL de l'API :</strong> http://localhost:8080
-        </div>
-        
-        <div class="cards">
-            <!-- Inscription -->
-            <div class="card">
-                <h2>📝 Inscription</h2>
-                <form id="registerForm">
-                    <div class="form-group">
-                        <label>Nom d'utilisateur</label>
-                        <input type="text" id="regUsername" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" id="regEmail" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Mot de passe</label>
-                        <input type="password" id="regPassword" required>
-                    </div>
-                    <button type="submit">S'inscrire</button>
-                </form>
+        <section class="hero">
+            <h1>PBAC Test Console</h1>
+            <p>Interface de test alignée avec l'architecture actuelle via Gateway: setup admin, register, verify, login, gestion des permissions, tests Service A/B et tests d'erreur.</p>
+        </section>
+
+        <section class="card">
+            <div class="row">
+                <div class="field">
+                    <label>Gateway URL</label>
+                    <input id="gatewayUrl" value="http://localhost:8082">
+                </div>
+                <div class="field">
+                    <label>MailHog URL</label>
+                    <input id="mailhogUrl" value="http://localhost:8025">
+                </div>
             </div>
-            
-            <!-- Connexion -->
-            <div class="card">
-                <h2>🔑 Connexion</h2>
-                <form id="loginForm">
-                    <div class="form-group">
-                        <label>Nom d'utilisateur</label>
-                        <input type="text" id="loginUsername" value="user" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Mot de passe</label>
-                        <input type="password" id="loginPassword" value="password123" required>
-                    </div>
-                    <button type="submit">Se connecter</button>
-                    <button type="button" class="btn-admin" onclick="loginAdmin()">Se connecter (Admin)</button>
-                </form>
-            </div>
-            
-            <!-- Tests routes protégées -->
-            <div class="card">
-                <h2>🛡️ Routes Protégées</h2>
-                <button onclick="getProfile()">Mon Profil</button>
-                <button class="btn-secondary" onclick="testUser()">Test Route USER</button>
-                <button class="btn-admin" onclick="testAdmin()">Test Route ADMIN</button>
-                <button class="btn-public" onclick="testPublic()">Test Route Publique</button>
-            </div>
-        </div>
-        
-        <!-- Token actuel -->
-        <div class="card" id="tokenCard" style="display:none;">
-            <h2>🎫 Token JWT</h2>
-            <div class="token-display">
-                <strong>Token actuel :</strong><br>
-                <span id="currentToken"></span>
-            </div>
-        </div>
-        
-        <!-- Réponses -->
-        <div id="response">
-            <h2>📡 Réponse du serveur</h2>
-            <div id="output">En attente de requête...</div>
-        </div>
+            <div class="hint">Etape manuelle: après register/setup, ouvre MailHog pour récupérer tokenId et t du lien de vérification, puis utilise la section Verify.</div>
+        </section>
+
+        <section class="grid">
+            <article class="card stack">
+                <h2>1) Setup Et Register</h2>
+                <div class="field">
+                    <label>Email admin</label>
+                    <input id="adminEmail" value="dido@example.com">
+                </div>
+                <div class="field">
+                    <label>Password admin</label>
+                    <input id="adminPassword" type="password" value="dido">
+                </div>
+                <button onclick="setupAdmin()">POST /setup</button>
+
+                <div class="field">
+                    <label>Email user</label>
+                    <input id="userEmail" value="achour@test.com">
+                </div>
+                <div class="field">
+                    <label>Password user</label>
+                    <input id="userPassword" type="password" value="achour">
+                </div>
+                <button class="btn-line" onclick="registerUser()">POST /register</button>
+            </article>
+
+            <article class="card stack">
+                <h2>2) Verify</h2>
+                <div class="field">
+                    <label>tokenId</label>
+                    <input id="verifyTokenId" placeholder="copier depuis le lien email">
+                </div>
+                <div class="field">
+                    <label>t</label>
+                    <input id="verifyT" placeholder="copier depuis le lien email">
+                </div>
+                <button onclick="verifyEmail()">GET /verify</button>
+                <button class="btn-warn" onclick="healthCheck()">GET /health</button>
+            </article>
+
+            <article class="card stack">
+                <h2>3) Login Et Tokens</h2>
+                <div class="field">
+                    <label>Email login admin</label>
+                    <input id="loginAdminEmail" value="dido@example.com">
+                </div>
+                <div class="field">
+                    <label>Password login admin</label>
+                    <input id="loginAdminPassword" type="password" value="dido">
+                </div>
+                <button onclick="loginAdmin()">Login Admin</button>
+
+                <div class="field">
+                    <label>Email login user</label>
+                    <input id="loginUserEmail" value="achour@test.com">
+                </div>
+                <div class="field">
+                    <label>Password login user</label>
+                    <input id="loginUserPassword" type="password" value="achour">
+                </div>
+                <button class="btn-line" onclick="loginUser()">Login User</button>
+                <div class="field">
+                    <label>Token admin</label>
+                    <div id="adminToken" class="token-block">Aucun token admin</div>
+                </div>
+                <div class="field">
+                    <label>Token user</label>
+                    <div id="userToken" class="token-block">Aucun token user</div>
+                </div>
+            </article>
+
+            <article class="card stack">
+                <h2>4) Permissions Et Admin</h2>
+                <div class="field">
+                    <label>Permissions (JSON array)</label>
+                    <textarea id="permissionsJson">["ACCESS_A","ACCESS_B"]</textarea>
+                </div>
+                <button onclick="grantPermissions()">PUT /permissions (admin token)</button>
+
+                <div class="field">
+                    <label>Email nouvel admin</label>
+                    <input id="newAdminEmail" value="admin2@example.com">
+                </div>
+                <div class="field">
+                    <label>Password nouvel admin</label>
+                    <input id="newAdminPassword" type="password" value="admin2pass">
+                </div>
+                <div class="field">
+                    <label>Permissions query (CSV)</label>
+                    <input id="newAdminPerms" value="ACCESS_A">
+                </div>
+                <button class="btn-warn" onclick="createAdmin()">POST /admin</button>
+            </article>
+
+            <article class="card stack">
+                <h2>5) Test Services</h2>
+                <button onclick="serviceA()">GET Service A (user token)</button>
+                <button class="btn-line" onclick="serviceB()">GET Service B (user token)</button>
+                <button class="btn-warn" onclick="serviceAWithoutToken()">Service A sans token (401 attendu)</button>
+                <button class="btn-danger" onclick="permissionsWithUserToken()">Permissions avec user token (403 attendu)</button>
+            </article>
+
+            <article class="card stack">
+                <h2>Actions Rapides</h2>
+                <button onclick="runMainFlow()">Flow principal automatique</button>
+                <button class="btn-line" onclick="clearLog()">Vider la console</button>
+                <button class="btn-warn" onclick="copyUserToken()">Copier token user</button>
+                <button class="btn-warn" onclick="copyAdminToken()">Copier token admin</button>
+            </article>
+        </section>
+
+        <section class="card stack">
+            <h2>Console</h2>
+            <div id="console" class="console">Pret. Lance un test.</div>
+        </section>
     </div>
 
     <script>
-        let token = null;
-        const API_URL = 'http://localhost:8080';
-        
-        // Afficher la réponse
-        function displayResponse(data, status, url) {
-            const output = document.getElementById('output');
-            const timestamp = new Date().toLocaleTimeString();
-            
-            let statusClass = status >= 200 && status < 300 ? 'success' : 'error';
-            
-            output.innerHTML = `
-<span class="${statusClass}">[${timestamp}] ${status} - ${url}</span>
+        let adminToken = "";
+        let userToken = "";
 
-${JSON.stringify(data, null, 2)}
-            `;
-            
-            // Si un token est reçu, le sauvegarder
-            if (data.token) {
-                token = data.token;
-                document.getElementById('currentToken').textContent = token;
-                document.getElementById('tokenCard').style.display = 'block';
+        function gateway() {
+            return document.getElementById("gatewayUrl").value.trim().replace(/\/$/, "");
+        }
+
+        function authBase() {
+            return gateway() + "/auth-service/api/auth";
+        }
+
+        function serviceABase() {
+            return gateway() + "/service-a/api/service-a";
+        }
+
+        function serviceBBase() {
+            return gateway() + "/service-b/api/service-b";
+        }
+
+        function stamp() {
+            return new Date().toLocaleTimeString();
+        }
+
+        function writeLog(message) {
+            const node = document.getElementById("console");
+            node.textContent = "[" + stamp() + "] " + message + "\n\n" + node.textContent;
+        }
+
+        function showRuntimeHints() {
+            if (window.location.protocol === "file:") {
+                writeLog("Attention: page ouverte en file://. Lance-la via un serveur local (ex: Live Server http://127.0.0.1:5500) pour eviter des blocages CORS navigateur.");
+            }
+            if (window.location.protocol === "https:" && gateway().startsWith("http://")) {
+                writeLog("Attention: page en HTTPS mais API en HTTP (mixed content). Le navigateur peut bloquer les requetes.");
             }
         }
-        
-        // Inscription
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const data = {
-                username: document.getElementById('regUsername').value,
-                email: document.getElementById('regEmail').value,
-                password: document.getElementById('regPassword').value
-            };
-            
-            try {
-                const response = await fetch(`${API_URL}/api/auth/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                
-                const result = await response.json();
-                displayResponse(result, response.status, '/api/auth/register');
-            } catch (error) {
-                displayResponse({ error: error.message }, 500, '/api/auth/register');
+
+        function updateTokensView() {
+            document.getElementById("adminToken").textContent = adminToken || "Aucun token admin";
+            document.getElementById("userToken").textContent = userToken || "Aucun token user";
+        }
+
+        async function apiCall(path, method, body, bearerToken) {
+            const headers = { "Content-Type": "application/json" };
+            if (bearerToken) {
+                headers.Authorization = "Bearer " + bearerToken;
             }
-        });
-        
-        // Connexion
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const data = {
-                username: document.getElementById('loginUsername').value,
-                password: document.getElementById('loginPassword').value
-            };
-            
-            try {
-                const response = await fetch(`${API_URL}/api/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                
-                const result = await response.json();
-                displayResponse(result, response.status, '/api/auth/login');
-            } catch (error) {
-                displayResponse({ error: error.message }, 500, '/api/auth/login');
+
+            const options = { method, headers };
+            if (body !== undefined && body !== null) {
+                options.body = typeof body === "string" ? body : JSON.stringify(body);
             }
-        });
-        
-        // Connexion admin
+
+            let res;
+            try {
+                res = await fetch(path, options);
+            } catch (err) {
+                const mixedContent = window.location.protocol === "https:" && path.startsWith("http://");
+                let hint = "Verifier que le gateway est demarre et que CORS est autorise.";
+                if (mixedContent) {
+                    hint = "Page en HTTPS et API en HTTP (mixed content). Ouvre la page en HTTP/file:// ou expose l'API en HTTPS.";
+                }
+                throw new Error("Echec reseau/CORS sur " + path + ". " + hint + " Détail: " + err.message);
+            }
+            const raw = await res.text();
+
+            let data;
+            try {
+                data = JSON.parse(raw);
+            } catch (e) {
+                data = { raw };
+            }
+
+            writeLog(method + " " + path + " -> " + res.status + "\n" + JSON.stringify(data, null, 2));
+            return { status: res.status, data };
+        }
+
+        function getAdminPayload() {
+            return {
+                email: document.getElementById("adminEmail").value.trim(),
+                password: document.getElementById("adminPassword").value
+            };
+        }
+
+        function getUserPayload() {
+            return {
+                email: document.getElementById("userEmail").value.trim(),
+                password: document.getElementById("userPassword").value
+            };
+        }
+
+        function getLoginAdminPayload() {
+            return {
+                email: document.getElementById("loginAdminEmail").value.trim(),
+                password: document.getElementById("loginAdminPassword").value,
+                authType: "PASSWORD"
+            };
+        }
+
+        function getLoginUserPayload() {
+            return {
+                email: document.getElementById("loginUserEmail").value.trim(),
+                password: document.getElementById("loginUserPassword").value,
+                authType: "PASSWORD"
+            };
+        }
+
+        async function setupAdmin() {
+            try {
+                await apiCall(authBase() + "/setup", "POST", getAdminPayload());
+            } catch (e) {
+                writeLog("Erreur setup: " + e.message);
+            }
+        }
+
+        async function registerUser() {
+            try {
+                await apiCall(authBase() + "/register", "POST", getUserPayload());
+            } catch (e) {
+                writeLog("Erreur register: " + e.message);
+            }
+        }
+
+        async function verifyEmail() {
+            const tokenId = document.getElementById("verifyTokenId").value.trim();
+            const t = document.getElementById("verifyT").value.trim();
+            if (!tokenId || !t) {
+                writeLog("Verify annule: tokenId et t sont requis.");
+                return;
+            }
+
+            try {
+                await apiCall(authBase() + "/verify?tokenId=" + encodeURIComponent(tokenId) + "&t=" + encodeURIComponent(t), "GET");
+            } catch (e) {
+                writeLog("Erreur verify: " + e.message);
+            }
+        }
+
         async function loginAdmin() {
-            const data = {
-                username: 'admin',
-                password: 'admin123'
-            };
-            
             try {
-                const response = await fetch(`${API_URL}/api/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                
-                const result = await response.json();
-                displayResponse(result, response.status, '/api/auth/login (ADMIN)');
-            } catch (error) {
-                displayResponse({ error: error.message }, 500, '/api/auth/login');
+                const payload = getLoginAdminPayload();
+                const result = await apiCall(authBase() + "/login", "POST", payload);
+                adminToken = result.data.token || "";
+                updateTokensView();
+            } catch (e) {
+                writeLog("Erreur login admin: " + e.message);
             }
         }
-        
-        // Profil
-        async function getProfile() {
-            if (!token) {
-                displayResponse({ error: 'Vous devez vous connecter d\'abord !' }, 401, '/api/auth/profile');
+
+        async function loginUser() {
+            try {
+                const payload = getLoginUserPayload();
+                const result = await apiCall(authBase() + "/login", "POST", payload);
+                userToken = result.data.token || "";
+                updateTokensView();
+            } catch (e) {
+                writeLog("Erreur login user: " + e.message);
+            }
+        }
+
+        async function grantPermissions() {
+            if (!adminToken) {
+                writeLog("Permissions annule: token admin manquant.");
                 return;
             }
-            
+
+            let perms;
             try {
-                const response = await fetch(`${API_URL}/api/auth/profile`, {
-                    method: 'GET',
-                    headers: { 
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                
-                const result = await response.json();
-                displayResponse(result, response.status, '/api/auth/profile');
-            } catch (error) {
-                displayResponse({ error: error.message }, 500, '/api/auth/profile');
-            }
-        }
-        
-        // Test route USER
-        async function testUser() {
-            if (!token) {
-                displayResponse({ error: 'Vous devez vous connecter d\'abord !' }, 401, '/api/auth/user/test');
+                perms = JSON.parse(document.getElementById("permissionsJson").value.trim());
+            } catch (e) {
+                writeLog("JSON permissions invalide.");
                 return;
             }
-            
+
+            const email = document.getElementById("userEmail").value.trim();
             try {
-                const response = await fetch(`${API_URL}/api/auth/user/test`, {
-                    method: 'GET',
-                    headers: { 
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                
-                const result = await response.json();
-                displayResponse(result, response.status, '/api/auth/user/test');
-            } catch (error) {
-                displayResponse({ error: error.message }, 500, '/api/auth/user/test');
+                await apiCall(authBase() + "/permissions?email=" + encodeURIComponent(email), "PUT", perms, adminToken);
+            } catch (e) {
+                writeLog("Erreur update permissions: " + e.message);
             }
         }
-        
-        // Test route ADMIN
-        async function testAdmin() {
-            if (!token) {
-                displayResponse({ error: 'Vous devez vous connecter d\'abord !' }, 401, '/api/auth/admin/test');
+
+        async function createAdmin() {
+            if (!adminToken) {
+                writeLog("Create admin annule: token admin manquant.");
                 return;
             }
-            
+
+            const email = document.getElementById("newAdminEmail").value.trim();
+            const password = document.getElementById("newAdminPassword").value;
+            const perms = document.getElementById("newAdminPerms").value.trim();
+            const query = perms.split(",").map(p => p.trim()).filter(Boolean).map(p => "permissions=" + encodeURIComponent(p)).join("&");
+
             try {
-                const response = await fetch(`${API_URL}/api/auth/admin/test`, {
-                    method: 'GET',
-                    headers: { 
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                
-                const result = await response.json();
-                displayResponse(result, response.status, '/api/auth/admin/test');
-            } catch (error) {
-                displayResponse({ error: error.message }, 500, '/api/auth/admin/test');
+                await apiCall(authBase() + "/admin?" + query, "POST", { email, password }, adminToken);
+            } catch (e) {
+                writeLog("Erreur create admin: " + e.message);
             }
         }
-        
-        // Test route publique
-        async function testPublic() {
+
+        async function serviceA() {
+            if (!userToken) {
+                writeLog("Service A annule: token user manquant.");
+                return;
+            }
             try {
-                const response = await fetch(`${API_URL}/api/public/test`, {
-                    method: 'GET'
-                });
-                
-                const result = await response.text();
-                displayResponse({ message: result }, response.status, '/api/public/test');
-            } catch (error) {
-                displayResponse({ error: error.message }, 500, '/api/public/test');
+                await apiCall(serviceABase() + "/hello", "GET", null, userToken);
+            } catch (e) {
+                writeLog("Erreur service A: " + e.message);
             }
         }
+
+        async function serviceB() {
+            if (!userToken) {
+                writeLog("Service B annule: token user manquant.");
+                return;
+            }
+            try {
+                await apiCall(serviceBBase() + "/hello", "GET", null, userToken);
+            } catch (e) {
+                writeLog("Erreur service B: " + e.message);
+            }
+        }
+
+        async function serviceAWithoutToken() {
+            try {
+                await apiCall(serviceABase() + "/hello", "GET");
+            } catch (e) {
+                writeLog("Erreur service A sans token: " + e.message);
+            }
+        }
+
+        async function permissionsWithUserToken() {
+            if (!userToken) {
+                writeLog("Test 403 annule: token user manquant.");
+                return;
+            }
+            const email = document.getElementById("adminEmail").value.trim();
+            try {
+                await apiCall(authBase() + "/permissions?email=" + encodeURIComponent(email), "PUT", ["ACCESS_A"], userToken);
+            } catch (e) {
+                writeLog("Erreur test 403: " + e.message);
+            }
+        }
+
+        async function healthCheck() {
+            try {
+                await apiCall(authBase() + "/health", "GET");
+            } catch (e) {
+                writeLog("Erreur health: " + e.message);
+            }
+        }
+
+        async function runMainFlow() {
+            writeLog("Flow principal: setup -> register -> login admin -> update permissions -> login user -> service A/B");
+            await setupAdmin();
+            await registerUser();
+            await loginAdmin();
+            await grantPermissions();
+            await loginUser();
+            await serviceA();
+            await serviceB();
+        }
+
+        function clearLog() {
+            document.getElementById("console").textContent = "Console nettoyee.";
+        }
+
+        async function copyUserToken() {
+            if (!userToken) {
+                writeLog("Copie impossible: token user vide.");
+                return;
+            }
+            try {
+                await navigator.clipboard.writeText(userToken);
+                writeLog("Token user copie dans le presse-papiers.");
+            } catch (e) {
+                writeLog("Copie token user echouee: " + e.message);
+            }
+        }
+
+        async function copyAdminToken() {
+            if (!adminToken) {
+                writeLog("Copie impossible: token admin vide.");
+                return;
+            }
+            try {
+                await navigator.clipboard.writeText(adminToken);
+                writeLog("Token admin copie dans le presse-papiers.");
+            } catch (e) {
+                writeLog("Copie token admin echouee: " + e.message);
+            }
+        }
+
+        updateTokensView();
+        showRuntimeHints();
     </script>
 </body>
 </html>

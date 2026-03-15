@@ -43,7 +43,6 @@ public class AuthController {
         return response.isSuccess() ? ResponseEntity.ok(response) : ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    // --- NOUVEAUX ENDPOINTS PBAC ---
 
   @PostMapping("/setup")
     public ResponseEntity<?> setupInitialAdmin(@Valid @RequestBody RegisterRequest request) {

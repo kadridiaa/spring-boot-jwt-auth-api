@@ -8,7 +8,6 @@ spring:
             - Path=/auth-service/**
           filters:
             - StripPrefix=1
-            - JwtAuthenticationFilter
 
         - id: notification-service
           uri: ${NOTIFICATION_SERVICE_URI:http://localhost:8081}
@@ -16,7 +15,6 @@ spring:
             - Path=/notification-service/**
           filters:
             - StripPrefix=1
-            - JwtAuthenticationFilter
 
         - id: feed-service
           uri: ${FEED_SERVICE_URI:http://localhost:8086}
@@ -24,7 +22,6 @@ spring:
             - Path=/feed-service/**
           filters:
             - StripPrefix=1
-            - JwtAuthenticationFilter
 
         - id: service-a
           uri: ${SERVICE_A_URI:http://localhost:8083}
@@ -32,7 +29,6 @@ spring:
             - Path=/service-a/**
           filters:
             - StripPrefix=1
-            - JwtAuthenticationFilter
 
         - id: service-b
           uri: ${SERVICE_B_URI:http://localhost:8084}
@@ -40,13 +36,23 @@ spring:
             - Path=/service-b/**
           filters:
             - StripPrefix=1
-            - JwtAuthenticationFilter
 
       globalcors:
+        add-to-simple-url-handler-mapping: true
         cors-configurations:
           '[/**]':
-            allowed-origins: "http://localhost:3000"
-            allowed-methods: "*"
+            allowed-origin-patterns:
+              - "http://localhost:*"
+              - "http://127.0.0.1:*"
+              - "null"
+            allowed-methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+              - OPTIONS
             allowed-headers: "*"
-            allow-credentials: true
+            exposed-headers: "*"
+            allow-credentials: false
             max-age: 3600
