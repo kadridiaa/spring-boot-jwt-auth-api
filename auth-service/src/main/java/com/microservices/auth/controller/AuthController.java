@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -57,10 +58,20 @@ public class AuthController {
 
     @PostMapping("/admin")
     public ResponseEntity<?> createAdmin(
-            @RequestHeader("X-User-Email") String creatorEmail, 
+            @RequestHeader(value = "X-User", required = false) String creatorFromGateway,
+            @RequestHeader(value = "X-User-Email", required = false) String creatorFromLegacyHeader,
             @RequestParam Set<String> permissions,
             @Valid @RequestBody RegisterRequest request) {
         try {
+            String creatorEmail = StringUtils.hasText(creatorFromGateway)
+                    ? creatorFromGateway
+                    : creatorFromLegacyHeader;
+
+            if (!StringUtils.hasText(creatorEmail)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(java.util.Collections.singletonMap("error", "Missing creator identity header (X-User or X-User-Email)."));
+            }
+
             return ResponseEntity.ok(authService.createAdmin(creatorEmail, request, permissions));
         } catch (RuntimeException e) {
             // REMPLACER ICI

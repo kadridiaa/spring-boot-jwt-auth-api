@@ -3,6 +3,7 @@ package com.softpaw.gatewayservice.filter;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpStatus;
@@ -10,12 +11,14 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAuthenticationFilter.Config> {
 
-    private final String SECRET_KEY = "SuperSecretKeyThatIsAtLeast32CharsLong!!!"; // Doit correspondre à celle de auth-service
+    @Value("${app.jwt.secret}")
+    private String secretKey;
 
     public JwtAuthenticationFilter() {
         super(Config.class);
@@ -29,11 +32,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             System.out.println("Requête reçue pour : " + path);
 
             // Skip JWT pour certains endpoints publics seulement
-            if (path.equals("/api/auth/register") || 
-                path.equals("/api/auth/login") || 
-                path.equals("/api/auth/verify") || 
-                path.equals("/api/auth/setup") ||
-                path.equals("/api/auth/health")) {
+            if (isPublicAuthPath(path)) {
                 return chain.filter(exchange);
             }
 
@@ -47,7 +46,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             token = token.substring(7);
 
             try {
-                SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+                SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
                 Claims claims = Jwts.parser()
                         .verifyWith(key)
                         .build()
@@ -65,6 +64,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
                 System.out.println("---------------------Permissions extraites : "+ permsHeader);
                 ServerHttpRequest modifiedRequest = request.mutate()
                         .header("X-User", username)
+                    .header("X-User-Email", username)
                         .header("X-User-Id", String.valueOf(userId))
                         .header("X-Permissions", permsHeader) // 👈 Ajout du header des permissions
                         .build();
@@ -77,6 +77,14 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
                 return exchange.getResponse().setComplete();
             }
         };
+    }
+
+    private boolean isPublicAuthPath(String path) {
+        return path.endsWith("/api/auth/register")
+                || path.endsWith("/api/auth/login")
+                || path.endsWith("/api/auth/verify")
+                || path.endsWith("/api/auth/setup")
+                || path.endsWith("/api/auth/health");
     }
 
 

@@ -17,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -149,12 +150,16 @@ public class AuthService {
 
     @Transactional
     public RegisterResponse setupInitialAdmin(RegisterRequest request) {
-        if (userRepository.count() > 0) {
+        boolean superAdminExists = userRepository.findAll().stream()
+            .map(User::getPermissions)
+            .anyMatch(permissions -> permissions != null && permissions.contains("ALL_ACCESS"));
+
+        if (superAdminExists) {
             throw new RuntimeException("Initial setup already done! Cannot create super admin.");
         }
         RegisterResponse response = this.register(request);
         User admin = userRepository.findByEmail(request.getEmail()).orElseThrow();
-        admin.setPermissions(Set.of("ALL_ACCESS"));
+        admin.setPermissions(new HashSet<>(Set.of("ALL_ACCESS")));
         userRepository.save(admin);
         return response;
     }
